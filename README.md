@@ -1,4 +1,4 @@
-# locationPicker for wwebiste by js
+# locationPicker for webiste by javascript
 
 This will help if you want to see location with longitude and latitude or if you want to get longitude or lattitude of user selected location
 
