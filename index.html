@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Location Picker</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+</head>
+
+<body>
+
+    <!-- Button to trigger the map initialization -->
+    <button type="button" onclick="editModalMap(31.51681097795192, 74.32250976562501)" class="btn btn-primary">
+        Pakistan
+    </button>
+    <button type="button" onclick="openmap(31.5222178956738, 31.5222178956738)" class="btn btn-primary">
+        other
+    </button>
+
+    <!-- Map Modal -->
+    <div class="modal fade" id="mapModal" tabindex="-1" role="dialog" aria-labelledby="mapModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="mapModalLabel">Select Location</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="map" style="height: 70vh;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="selectLocationBtn">Select Location</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+    <script>
+        let map, marker, latitude, longitude;
+        function openmap(latitude, longitude) {
+            document.getElementById('selectLocationBtn').style.display = 'none';
+
+            if (!map) {
+                // Initialize the map only if it's not already initialized
+                map = L.map('map').setView([latitude, longitude], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                }).addTo(map);
+            }
+
+            if (!marker) {
+                // Create marker if not already created
+                marker = L.marker([latitude, longitude]).addTo(map);
+            }
+
+            // Disable dragging in view mode
+            marker.dragging.disable();
+
+            // Show the modal
+            $('#mapModal').modal('show');
+            $('#mapModal').on('shown.bs.modal', function () {
+                map.invalidateSize();
+            });
+        }
+        function editModalMap(initialLatitude, initialLongitude) {
+            document.getElementById('selectLocationBtn').style.display = 'inline';
+            latitude = initialLatitude;
+            longitude = initialLongitude;
+
+            if (!map) {
+                // Initialize the map only if it's not already initialized
+                map = L.map('map').setView([initialLatitude, initialLongitude], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                }).addTo(map);
+            }
+
+            // Update marker and map view
+            if (marker) {
+                marker.setLatLng([latitude, longitude]);
+                map.setView([latitude, longitude], 13);
+            } else {
+                // Create marker if not already created
+                marker = L.marker([latitude, longitude], {
+                    draggable: true
+                }).addTo(map);
+
+                // Update latitude and longitude on marker drag
+                marker.on('dragend', function (event) {
+                    latitude = event.target.getLatLng().lat;
+                    longitude = event.target.getLatLng().lng;
+                });
+
+                // Handle map click to move the marker
+                map.on('click', function (event) {
+                    marker.setLatLng(event.latlng);
+                    latitude = event.latlng.lat;
+                    longitude = event.latlng.lng;
+                });
+
+                // Handle location selection
+                document.getElementById('selectLocationBtn').addEventListener('click', function () {
+                    // Use latitude and longitude for further processing
+                    console.log('Selected Latitude:', latitude);
+                    console.log('Selected Longitude:', longitude);
+                    // Close the modal
+                    $('#mapModal').modal('hide');
+                });
+            }
+
+            // Show the modal
+            $('#mapModal').modal('show');
+            $('#mapModal').on('shown.bs.modal', function () {
+                map.invalidateSize();
+            });
+        }
+        $('#mapModal').on('hidden.bs.modal', function () {
+            if (map) {
+                map.remove();
+                map = null;
+            }
+            if (marker) {
+                marker.remove();
+                marker = null;
+            }
+        });
+    </script>
+
+</body>
+
+</html>
